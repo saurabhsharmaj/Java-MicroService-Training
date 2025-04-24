@@ -25,7 +25,7 @@ import java.util.Date;
 /**
  * The type Error response.
  *
- * @author Givantha Kalansuriya
+ * @author Saurabh Sharma
  */
 public class ErrorResponse {
 

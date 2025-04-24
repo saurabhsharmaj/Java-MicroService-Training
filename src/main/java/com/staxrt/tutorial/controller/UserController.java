@@ -20,23 +20,32 @@
 
 package com.staxrt.tutorial.controller;
 
-import com.staxrt.tutorial.exception.ResourceNotFoundException;
-import com.staxrt.tutorial.model.User;
-import com.staxrt.tutorial.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.staxrt.tutorial.exception.ResourceNotFoundException;
+import com.staxrt.tutorial.model.User;
+import com.staxrt.tutorial.repository.UserRepository;
+
+import jakarta.validation.Valid;
+
 /**
  * The type User controller.
  *
- * @author Givantha Kalansuriya
+ * @author Saurabh Sharma
  */
 @RestController
 @RequestMapping("/api/v1")
@@ -116,7 +125,7 @@ public class UserController {
    * @return the map
    * @throws Exception the exception
    */
-  @DeleteMapping("/user/{id}")
+  @DeleteMapping("/users/{id}")
   public Map<String, Boolean> deleteUser(@PathVariable(value = "id") Long userId) throws Exception {
     User user =
         userRepository

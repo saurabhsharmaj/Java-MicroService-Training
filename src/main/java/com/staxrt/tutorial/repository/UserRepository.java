@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 /**
  * The interface User repository.
  *
- * @author Givantha Kalansuriya
+ * @author Saurabh Sharma
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {}
