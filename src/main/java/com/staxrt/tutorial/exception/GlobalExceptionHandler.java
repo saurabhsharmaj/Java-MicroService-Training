@@ -20,13 +20,15 @@
 
 package com.staxrt.tutorial.exception;
 
+import java.util.Date;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-import java.util.Date;
+import jakarta.validation.ConstraintViolationException;
 
 /**
  * The type Global exception handler.
@@ -51,6 +53,12 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
   }
 
+//  @ExceptionHandler(ConstraintViolationException.class)
+//  public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {
+//      return ResponseEntity
+//              .badRequest()
+//              .body("Validation error: " + ex.getMessage());
+//  }
   /**
    * Globle excpetion handler response entity.
    *
