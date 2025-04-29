@@ -53,12 +53,19 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
   }
 
-//  @ExceptionHandler(ConstraintViolationException.class)
-//  public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {
-//      return ResponseEntity
-//              .badRequest()
-//              .body("Validation error: " + ex.getMessage());
-//  }
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex) {
+      String errorMessage = ex.getConstraintViolations()
+              .stream()
+              .map(violation -> violation.getMessage())
+              .findFirst()
+              .orElse("Validation failed");
+
+      return ResponseEntity
+              .status(HttpStatus.BAD_REQUEST)
+              .body(errorMessage); // Or wrap in a JSON object if preferred
+  }
+  
   /**
    * Globle excpetion handler response entity.
    *
