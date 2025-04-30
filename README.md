@@ -29,6 +29,12 @@ java -jar target/spring-boot-rest-api-tutorial-0.0.1-SNAPSHOT.jar
 
 ```
 
+docker build -t ersaurabhsharmamca/api-tutorial:latest .
+
+docker push ersaurabhsharmamca/api-tutorial:latest
+
+docker run -p 8082:8082 ersaurabhsharmamca/api-tutorial:latest
+
 Alternatively, you can run the app without packaging it using -
 
 ```bash
