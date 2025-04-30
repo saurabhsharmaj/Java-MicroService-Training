@@ -7,5 +7,12 @@ WORKDIR /app
 # Copy the jar file
 COPY target/*.jar app.jar
 
-# Run the jar file
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Download the OpenTelemetry agent JAR during build
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar opentelemetry-javaagent.jar
+
+# Run the app with the Java agent
+ENTRYPOINT ["java", "-javaagent:opentelemetry-javaagent.jar", \
+    "-Dotel.service.name=api-tutorial", \
+    "-Dotel.exporter.otlp.endpoint=http://host.docker.internal:4317", \
+    "-Dotel.metrics.exporter=none", \
+    "-jar", "app.jar"]
