@@ -1,0 +1,8 @@
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 4317
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
