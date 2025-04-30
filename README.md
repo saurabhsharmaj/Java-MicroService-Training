@@ -37,6 +37,10 @@ docker run -p 8082:8082 ersaurabhsharmamca/api-tutorial:latest
 
 Alternatively, you can run the app without packaging it using -
 
+
+
+go inside the Docker and docker-compose up
+add your prometheus : http://host.docker.internal:9090/
 Grafana Dashboard ID: 4701 (Micrometer + Spring Boot)
 
 ```bash
