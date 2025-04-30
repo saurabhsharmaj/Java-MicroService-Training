@@ -37,6 +37,8 @@ docker run -p 8082:8082 ersaurabhsharmamca/api-tutorial:latest
 
 Alternatively, you can run the app without packaging it using -
 
+Grafana Dashboard ID: 4701 (Micrometer + Spring Boot)
+
 ```bash
 mvn spring-boot:run
 ```
