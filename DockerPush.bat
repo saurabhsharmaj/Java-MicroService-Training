@@ -2,7 +2,7 @@
 setlocal
 
 REM ----- Configuration -----
-set APP_NAME=spring-boot-app
+set APP_NAME=api-tutorial
 set DOCKER_USERNAME=ersaurabhsharmamca
 set IMAGE_TAG=latest
 set CONTAINER_NAME=springboot-container
@@ -28,7 +28,7 @@ docker stop %CONTAINER_NAME% 2>nul
 docker rm %CONTAINER_NAME% 2>nul
 
 echo Running Docker Container Locally...
-docker run -d -p 8082:8082 --name %CONTAINER_NAME% %DOCKER_USERNAME%/%APP_NAME%:%IMAGE_TAG%
+REM docker run -d -p 8082:8082 --name %CONTAINER_NAME% %DOCKER_USERNAME%/%APP_NAME%:%IMAGE_TAG%
 
 echo Deployment Complete! Application running at http://localhost:8082
 endlocal
