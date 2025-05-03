@@ -44,6 +44,7 @@ import com.staxrt.tutorial.repository.UserRepository;
 import com.staxrt.tutorial.utils.CommaSeparatedAllowedValues;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The type User controller.
@@ -53,6 +54,7 @@ import jakarta.validation.Valid;
 @Validated
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j 
 public class UserController {
 
   @Autowired
@@ -61,7 +63,8 @@ public class UserController {
   @GetMapping("/validation")
   public String sayHello(@CommaSeparatedAllowedValues(allowed = {"A", "B", "C", "D"}, message = "Only A, B, C, D are allowed.")
    @RequestParam String category) {
-    return "OK1";
+	  log.info("say hello category:"+category);
+	  return "OK1";
   }
 
   /**
@@ -71,6 +74,7 @@ public class UserController {
    */
   @GetMapping("/users")
   public List<User> getAllUsers() {
+	  log.info("get all user api");
     return userRepository.findAll();
   }
 
@@ -84,6 +88,7 @@ public class UserController {
   @GetMapping("/users/{id}")
   public ResponseEntity<User> getUsersById(@PathVariable(value = "id") Long userId)
       throws ResourceNotFoundException {
+	  log.info("get user by id:"+userId);
     User user =
         userRepository
             .findById(userId)
@@ -99,6 +104,7 @@ public class UserController {
    */
   @PostMapping("/users")
   public User createUser(@Valid @RequestBody User user) {
+	  log.info("create user:"+user);
     return userRepository.save(user);
   }
 
@@ -114,7 +120,7 @@ public class UserController {
   public ResponseEntity<User> updateUser(
       @PathVariable(value = "id") Long userId, @Valid @RequestBody User userDetails)
       throws ResourceNotFoundException {
-
+	  log.info("update the user:"+userDetails);
     User user =
         userRepository
             .findById(userId)
@@ -137,6 +143,7 @@ public class UserController {
    */
   @DeleteMapping("/users/{id}")
   public Map<String, Boolean> deleteUser(@PathVariable(value = "id") Long userId) throws Exception {
+	  log.info("delete user:"+userId);
     User user =
         userRepository
             .findById(userId)

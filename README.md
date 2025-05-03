@@ -28,6 +28,7 @@ mvn package
 java -jar target/spring-boot-rest-api-tutorial-0.0.1-SNAPSHOT.jar
 
 ```
+docker-compose up --force-recreate
 
 docker build -t ersaurabhsharmamca/api-tutorial:latest .
 
