@@ -28,6 +28,9 @@ mvn package
 java -jar target/spring-boot-rest-api-tutorial-0.0.1-SNAPSHOT.jar
 
 ```
+Install curl in container: apt update && apt install -y curl
+
+docker-compose up --force-recreate
 
 docker build -t ersaurabhsharmamca/api-tutorial:latest .
 
@@ -64,4 +67,3 @@ The app defines following CRUD APIs.
     DELETE /api/v1/users/{userId}
 
 You can find the tutorial for this application on my blog -
-
