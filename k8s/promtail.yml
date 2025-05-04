@@ -14,16 +14,16 @@ data:
       filename: /tmp/positions.yaml
 
     clients:
-      - url: http://192.168.1.44:3100/loki/api/v1/push
+      - url: http://host.docker.internal:3100/loki/api/v1/push
 
     scrape_configs:
-      - job_name: kubernetes-pods
+      - job_name: spring-boot-app
         static_configs:
           - targets:
               - localhost
             labels:
-              job: kubernetes-pods
-              __path__: /var/log/pods/*/*/*.log
+              job: spring-boot-app
+              __path__: /var/log/pods/*spring-boot-app*/*/*.log
 
       - job_name: container-logs
         static_configs:

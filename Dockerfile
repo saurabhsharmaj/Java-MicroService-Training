@@ -13,7 +13,7 @@ ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/release
 # Run the app with the Java agent
 ENTRYPOINT ["java", "-javaagent:opentelemetry-javaagent.jar", \
     "-Dotel.service.name=api-tutorial", \
-    "-Dotel.exporter.otlp.endpoint=http://192.168.1.44:4317", \
+    "-Dotel.exporter.otlp.endpoint=http://host.docker.internal:4317", \
 	"-Dotel.exporter.otlp.protocol=grpc", \
     "-Dotel.metrics.exporter=none", \
     "-jar", "app.jar"]
