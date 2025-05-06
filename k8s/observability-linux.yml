@@ -633,3 +633,9 @@ data:
       - job_name: 'kube-state-metrics'
         static_configs:
           - targets: ['kube-state-metrics.observability.svc:8080']
+      - job_name: 'spring-boot-app'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: ['spring-boot-service.default.svc:30506']  # If app is on host, and Prometheus in Docker
+            labels:
+              application: 'api-tutorial'
