@@ -131,7 +131,7 @@ spec:
       port: 8081
       targetPort: telemetry
       nodePort: 30083  # optional
-
+---
 
 apiVersion: v1
 kind: ConfigMap
@@ -220,7 +220,7 @@ spec:
       targetPort: 3100
   type: ClusterIP  
 
-
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -351,7 +351,7 @@ spec:
             path: /var/log/containers
         - name: positions
           emptyDir: {}
-
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
