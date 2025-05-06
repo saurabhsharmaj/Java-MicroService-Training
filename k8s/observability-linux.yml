@@ -266,8 +266,8 @@ data:
 
     clients:
   
-       - url: http://10.108.102.21:3100/loki/api/v1/push
-         #  - url: http://loki.observability.svc.cluster.local:3100/loki/api/v1/push
+       #- url: http://10.108.102.21:3100/loki/api/v1/push
+          - url: http://loki.observability.svc:3100/loki/api/v1/push
 
     scrape_configs:
       - job_name: kubernetes-pods
