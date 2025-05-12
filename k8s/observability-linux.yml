@@ -266,8 +266,8 @@ data:
 
     clients:
   
-       #- url: http://10.108.102.21:3100/loki/api/v1/push
-          - url: http://loki.observability.svc:3100/loki/api/v1/push
+      # - url: http://10.108.102.21:3100/loki/api/v1/push
+       - url: http://loki.observability.svc:3100/loki/api/v1/push
 
     scrape_configs:
       - job_name: kubernetes-pods
@@ -351,121 +351,6 @@ spec:
             path: /var/log/containers
         - name: positions
           emptyDir: {}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: tempo-config
-  namespace: observability
-data:
-  tempo.yaml: |
-    server:
-      http_listen_port: 3200
-    distributor:
-      receivers:
-        jaeger:
-          protocols:
-            thrift_http:
-            grpc:
-            thrift_binary:
-            thrift_compact:
-        otlp:
-          protocols:
-            grpc:
-            http:
-    storage:
-      trace:
-        backend: local
-        local:
-          path: /var/tempo
-        wal:
-          path: /var/tempo/wal
-    memberlist:
-      join_members:
-        - tempo.observability.svc.cluster.local
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: tempo
-  namespace: observability
-  labels:
-    app: tempo
-spec:
-  serviceName: tempo
-  replicas: 1
-  selector:
-    matchLabels:
-      app: tempo
-  template:
-    metadata:
-      labels:
-        app: tempo
-    spec:
-      containers:
-      - name: tempo
-        image: grafana/tempo:latest
-        args: ["-config.file=/etc/tempo/tempo.yaml"]
-        ports:
-        - containerPort: 3200
-          name: http
-        - containerPort: 6831
-          name: jaeger-thrift
-        - containerPort: 6832
-          name: jaeger-compact
-        - containerPort: 14250
-          name: jaeger-grpc
-        - containerPort: 14268
-          name: jaeger-http
-        - containerPort: 4317
-          name: otlp-grpc
-        - containerPort: 4318
-          name: otlp-http
-        volumeMounts:
-        - name: config
-          mountPath: /etc/tempo
-        - name: storage
-          mountPath: /var/tempo
-      volumes:
-      - name: config
-        configMap:
-          name: tempo-config
-      - name: storage
-        emptyDir: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: tempo
-  namespace: observability
-  labels:
-    app: tempo
-spec:
-  type: ClusterIP
-  ports:
-  - name: http
-    port: 3200
-    targetPort: http
-  - name: jaeger-thrift
-    port: 6831
-    targetPort: jaeger-thrift
-  - name: jaeger-compact
-    port: 6832
-    targetPort: jaeger-compact
-  - name: jaeger-grpc
-    port: 14250
-    targetPort: jaeger-grpc
-  - name: jaeger-http
-    port: 14268
-    targetPort: jaeger-http
-  - name: otlp-grpc
-    port: 4317
-    targetPort: otlp-grpc
-  - name: otlp-http
-    port: 4318
-    targetPort: otlp-http
-  selector:
-    app: tempo
 
 ---
 apiVersion: v1
@@ -503,17 +388,22 @@ spec:
     spec:
       containers:
         - name: grafana
-          image: grafana/grafana:9.0.0
+          image: grafana/grafana
           ports:
             - containerPort: 3000
           env:
             - name: GF_SECURITY_ADMIN_PASSWORD
               value: "admin"
+                #  - name: GF_INSTALL_PLUGINS
+              #              value: "https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip;grafana-traces-app"
+
           volumeMounts:
-            - name: grafana-datasources
-              mountPath: /etc/grafana/provisioning/datasources
-            - name: grafana-dashboards
-              mountPath: /etc/grafana/provisioning/dashboards
+               - name: grafana-datasources
+                 mountPath: /etc/grafana/provisioning/datasources
+               - name: grafana-dashboards
+                 mountPath: /etc/grafana/provisioning/dashboards
+                   # - name: dashboard-json
+                 #  mountPath: /var/lib/grafana/dashboards
       volumes:
         - name: grafana-datasources
           configMap:
@@ -521,6 +411,11 @@ spec:
         - name: grafana-dashboards
           configMap:
             name: grafana-dashboards
+              # - name: dashboard-json
+          #        configMap:
+          # name: grafana-dashboard-json
+   # configMap:
+              # name: grafana-dashboard-json 
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -639,3 +534,260 @@ data:
           - targets: ['spring-boot-service.observability.svc:30506']  # If app is on host, and Prometheus in Docker
             labels:
               application: 'api-tutorial'
+
+      - job_name: 'kubelet'
+        scheme: https
+        tls_config:
+           insecure_skip_verify: true
+        metrics_path: /metrics/cadvisor
+        static_configs:
+          - targets:
+            - 192.168.1.8:10250
+            - 192.168.1.34:10250
+      - job_name: 'flask-app'
+        static_configs:
+           - targets: ['flask-app-service.observability.svc:5000']  # Replace with the actual IP/hostname of your Flask app
+
+      - job_name: 'blackbox-exporter-metrics'
+        metrics_path: /probe
+        params:
+          module: [http_endpoint]
+        static_configs:
+          - targets:
+            - http://flask-app-service.observability.svc:5000
+        relabel_configs:
+         - source_labels: [__address__]
+           target_label: __param_target
+         - source_labels: [__param_target]
+           target_label: instance
+         - target_label: __address__
+           replacement: "blackbox-exporter.observability.svc:9115"        
+
+
+      - job_name: 'node-exporter'
+        static_configs:
+           - targets: ['node-exporter.observability.svc:9100'] # Add all node IPs
+
+     
+      - job_name: 'tempo'
+        static_configs:
+           - targets: ['tempo.observability.svc:3200']
+        
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tempo-config
+  namespace: observability
+data:
+  tempo.yaml: |
+    server:
+      http_listen_port: 3200
+    distributor:
+      receivers:
+        jaeger:
+          protocols:
+            thrift_http:
+              endpoint: 0.0.0.0:14268
+            grpc: {}
+            thrift_binary: {}
+            thrift_compact: {}
+        otlp:
+          protocols:
+            grpc:
+              endpoint: 0.0.0.0:4317
+            http:
+              endpoint: 0.0.0.0:4318
+    storage:
+      trace:
+        backend: local
+        local:
+          path: /var/tempo
+        wal:
+          path: /var/tempo/wal
+    memberlist:
+      join_members:
+        - tempo.observability.svc.cluster.local
+    metrics_generator:
+      storage:
+        path: /var/tempo/metrics  # Enable metrics generation by setting the storage path
+    # Prometheus Metrics Configuration (expose on port 9090)
+    #    metrics:
+    #  http:
+    #    listen_address: ":9090"  # Expose Prometheus metrics on port 9090
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tempo
+  namespace: observability
+spec:
+  serviceName: tempo
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tempo
+  template:
+    metadata:
+      labels:
+        app: tempo
+    spec:
+      containers:
+        - name: tempo
+          image: grafana/tempo:latest
+          args: ["-config.file=/etc/tempo/tempo.yaml"]
+          ports:
+            - name: http
+              containerPort: 3200
+            - name: jaeger-thrift
+              containerPort: 6831
+            - name: jaeger-compact
+              containerPort: 6832
+            - name: jaeger-grpc
+              containerPort: 14250
+            - name: jaeger-http
+              containerPort: 14268
+            - name: otlp-grpc
+              containerPort: 4317
+            - name: otlp-http
+              containerPort: 4318
+            - name: metrics
+              containerPort: 9090  # Expose Prometheus metrics
+          volumeMounts:
+            - name: config
+              mountPath: /etc/tempo
+            - name: storage
+              mountPath: /var/tempo
+      volumes:
+        - name: config
+          configMap:
+            name: tempo-config
+        - name: storage
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo
+  namespace: observability
+spec:
+  selector:
+    app: tempo
+  ports:
+    - name: http
+      port: 3200
+      targetPort: http
+    - name: jaeger-thrift
+      port: 6831
+      targetPort: jaeger-thrift
+    - name: jaeger-compact
+      port: 6832
+      targetPort: jaeger-compact
+    - name: jaeger-grpc
+      port: 14250
+      targetPort: jaeger-grpc
+    - name: jaeger-http
+      port: 14268
+      targetPort: jaeger-http
+    - name: otlp-grpc
+      port: 4317
+      targetPort: otlp-grpc
+    - name: otlp-http
+      port: 4318
+      targetPort: otlp-http
+    - name: metrics
+      port: 9090
+      targetPort: metrics  # Expose Prometheus metrics on port 9090
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+            - name: MYSQL_DATABASE
+              value: user_database
+          ports:
+            - containerPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: observability
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-tutorial
+  namespace: observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-tutorial
+  template:
+    metadata:
+      labels:
+        app: api-tutorial
+    spec:
+      containers:
+        - name: app
+          image: rajdeepsingh642/java-app:v1  # replace with your image
+          ports:
+            - containerPort: 8082
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: api-tutorial
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://tempo.observability.svc:4317
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: grpc
+            - name: OTEL_METRICS_EXPORTER
+              value: none
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql.observability.svc:3306/user_database?allowPublicKeyRetrieval=true&useSSL=false
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: root
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-tutorial
+  namespace: observability
+spec:
+  selector:
+    app: api-tutorial
+  ports:
+    - port: 8082
+      targetPort: 8082
+  type: NodePort
