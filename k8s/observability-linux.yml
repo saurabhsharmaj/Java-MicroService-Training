@@ -410,10 +410,9 @@ data:
       - job_name: 'spring-boot-app'
         metrics_path: '/actuator/prometheus'
         static_configs:
-          - targets: ['spring-boot-service.observability.svc:30506']  # If app is on host, and Prometheus in Docker
+          - targets: ['spring-boot-service.default.svc:8082']  # If app is on host, and Prometheus in Docker
             labels:
-              application: 'api-tutorial'
-
+              application: 'api-tutorial'      
       - job_name: 'kubelet'
         scheme: https
         tls_config:
