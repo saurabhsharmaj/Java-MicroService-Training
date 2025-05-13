@@ -1,0 +1,140 @@
+#Grafana (Datasource | Dashboard.)
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: observability
+spec:
+  selector:
+    app: grafana
+  type: NodePort  # Exposing as NodePort
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+      nodePort: 30001  # NodePort in the range 30000–32767
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: observability
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana
+          ports:
+            - containerPort: 3000
+          env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: "admin"
+                #  - name: GF_INSTALL_PLUGINS
+              #              value: "https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip;grafana-traces-app"
+
+          volumeMounts:
+               - name: grafana-datasources
+                 mountPath: /etc/grafana/provisioning/datasources
+               - name: dashboard-config
+                 mountPath: /etc/grafana/provisioning/dashboards/dashboard.yaml
+                 subPath: dashboard.yaml
+               - name: dashboard-json
+                 mountPath: /etc/grafana/provisioning/dashboards/json/observability-dashboard.json
+                 subPath: observability-dashboard.json
+      volumes:
+        - name: grafana-datasources
+          configMap:
+            name: grafana-datasources
+        - name: dashboard-config
+          configMap:
+            name: grafana-dashboard-config
+        - name: dashboard-json
+          configMap:
+            name: grafana-dashboard-json
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: observability
+data:
+  datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        url: http://loki.observability.svc:3100
+        access: proxy
+        isDefault: true
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus.observability.svc:9090
+        access: proxy
+        isDefault: false
+      - name: kube-state-metrics
+        type: prometheus
+        url: http://prometheus.observability.svc:9090
+        access: proxy
+        isDefault: false
+      - name: Tempo
+        type: tempo
+        url: http://tempo.observability.svc:3200
+        access: proxy
+        isDefault: false
+        
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-config
+  namespace: observability
+data:
+  dashboard.yaml: |
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        folder: ''
+        type: file
+        options:
+          path: /etc/grafana/provisioning/dashboards
+    
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-json
+  namespace: observability
+data:
+  observability-dashboard.json: |
+    {
+      "id": 1,
+      "uid": "basic-observability",
+      "title": "Observability Dashboard",
+      "timezone": "browser",
+      "schemaVersion": 36,
+      "version": 1,
+      "refresh": "30s",
+      "panels": [],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      }
+    }
+
+---
