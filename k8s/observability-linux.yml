@@ -874,7 +874,7 @@ data:
                 "uid": "P6E9BEA4D3F394BA1"
               },
               "editorMode": "code",
-              "expr": "sum(kube_pod_container_resource_requests{cluster=\"\",resource=\"cpu\",node=~\"master\"})/ sum(kube_node_status_allocatable{node=~\"master\",cluster=\"\",resource=\"cpu\"})",
+              "expr": "sum(kube_pod_container_resource_requests{cluster=\"\",resource=\"cpu\"})/ sum(kube_node_status_allocatable{cluster=\"\",resource=\"cpu\"})",
               "range": true,
               "refId": "A"
             }
@@ -941,7 +941,7 @@ data:
                 "uid": "P6E9BEA4D3F394BA1"
               },
               "editorMode": "code",
-              "expr": "sum(kube_pod_info{cluster=\"\",node=~\"master\"}) / sum(kube_node_status_allocatable{cluster=\"\",resource=\"pods\",node=~\"master\"})",
+              "expr": "sum(kube_pod_info{cluster=\"\"}) / sum(kube_node_status_allocatable{cluster=\"\",resource=\"pods\"})",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
