@@ -1,4 +1,4 @@
-
+git clone -b feature/docker  https://github.com/saurabhsharmaj/Java-MicroService-Training.git 
 docker-compose up --build -d
 
 postman
