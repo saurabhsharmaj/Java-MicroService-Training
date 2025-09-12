@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins-plugins
+data:
+  plugins.txt: |
+    workflow-aggregator
+    pipeline-stage-view
+    pipeline-github-lib
+    pipeline-utility-steps
+    github
+    github-branch-source
+    git
+    git-parameter
+    sonar
+    quality-gates
+    docker-plugin
+    kubernetes
+    kubernetes-cli
+    hashicorp-vault-plugin
+    credentials-binding
+    ssh-agent
+    matrix-auth
+    job-dsl
+    blueocean
+    build-pipeline-plugin
+    artifactdeployer
+    htmlpublisher
+    email-ext
+    ansicolor
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080
+    - name: agent
+      port: 50000
+      targetPort: 50000
+      nodePort: 30500
+  selector:
+    app: jenkins
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      initContainers:
+      - name: install-plugins
+        image: jenkins/jenkins:lts
+        command:
+          - sh
+          - -c
+          - |
+            jenkins-plugin-cli --plugin-file /plugins.txt && \
+            mkdir -p /var/jenkins_home/plugins && \
+            cp -r /usr/share/jenkins/ref/plugins/* /var/jenkins_home/plugins/
+        volumeMounts:
+          - name: jenkins-home
+            mountPath: /var/jenkins_home
+          - name: plugin-list
+            mountPath: /plugins.txt
+            subPath: plugins.txt
+
+
+
+      containers:
+        - name: jenkins
+          image: jenkins/jenkins:lts
+          ports:
+            - containerPort: 8080
+            - containerPort: 50000
+          env:
+            - name: JAVA_OPTS
+              value: "-Djenkins.install.runSetupWizard=false"
+          volumeMounts:
+            - name: jenkins-home
+              mountPath: /var/jenkins_home
+      volumes:
+        - name: jenkins-home
+          persistentVolumeClaim:
+            claimName: jenkins-pvc
+        - name: plugin-list
+          configMap:
+            name: jenkins-plugins
