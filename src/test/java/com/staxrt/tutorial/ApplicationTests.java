@@ -10,10 +10,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.staxrt.tutorial.model.User;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -47,7 +48,9 @@ public class ApplicationTests {
 	@Test
 	public void testGetUserById() {
 		User user = restTemplate.getForObject(getRootUrl() + "/users/1", User.class);
-		System.out.println(user.getFirstName());
+		if (user != null) {
+			System.out.println(user.getFirstName());
+		}
 		assertNotNull(user);
 	}
 
@@ -66,9 +69,10 @@ public class ApplicationTests {
 	}
 
 	@Test
-	public void testUpdatePost() {
+	public void testUpdateUser() {
 		int id = 1;
 		User user = restTemplate.getForObject(getRootUrl() + "/users/" + id, User.class);
+		assertNotNull(user);
 		user.setFirstName("admin1");
 		user.setLastName("admin2");
 
@@ -79,7 +83,7 @@ public class ApplicationTests {
 	}
 
 	@Test
-	public void testDeletePost() {
+	public void testDeleteUser() {
 		int id = 2;
 		User user = restTemplate.getForObject(getRootUrl() + "/users/" + id, User.class);
 		assertNotNull(user);
@@ -89,7 +93,7 @@ public class ApplicationTests {
 		try {
 			user = restTemplate.getForObject(getRootUrl() + "/users/" + id, User.class);
 		} catch (final HttpClientErrorException e) {
-			assertEquals(e.getStatusCode(), HttpStatus.NOT_FOUND);
+			assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
 		}
 	}
 

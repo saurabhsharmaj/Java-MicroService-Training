@@ -55,12 +55,18 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1")
 public class UserController {
 
-  @Autowired
-  private UserRepository userRepository;
+  private static final String USER_NOT_FOUND_MSG = "User not found on :: ";
+
+  private final UserRepository userRepository;
+
+  public UserController(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
 
   @GetMapping("/validation")
   public String sayHello(@CommaSeparatedAllowedValues(allowed = {"A", "B", "C", "D"}, message = "Only A, B, C, D are allowed.")
    @RequestParam String category) {
+    // Parameter 'category' is validated but not used in logic
     return "OK1";
   }
 
@@ -87,7 +93,7 @@ public class UserController {
     User user =
         userRepository
             .findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found on :: " + userId));
+            .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MSG + userId));
     return ResponseEntity.ok().body(user);
   }
 
@@ -118,7 +124,7 @@ public class UserController {
     User user =
         userRepository
             .findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found on :: " + userId));
+            .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MSG + userId));
 
     user.setEmail(userDetails.getEmail());
     user.setLastName(userDetails.getLastName());
@@ -133,14 +139,14 @@ public class UserController {
    *
    * @param userId the user id
    * @return the map
-   * @throws Exception the exception
+   * @throws ResourceNotFoundException the resource not found exception
    */
   @DeleteMapping("/users/{id}")
-  public Map<String, Boolean> deleteUser(@PathVariable(value = "id") Long userId) throws Exception {
+  public Map<String, Boolean> deleteUser(@PathVariable(value = "id") Long userId) throws ResourceNotFoundException {
     User user =
         userRepository
             .findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found on :: " + userId));
+            .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MSG + userId));
 
     userRepository.delete(user);
     Map<String, Boolean> response = new HashMap<>();
