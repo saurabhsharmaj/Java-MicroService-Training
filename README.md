@@ -3,9 +3,11 @@ git clone -b feature/docker  https://github.com/saurabhsharmaj/Java-MicroService
 docker-compose up --build -d
 
 postman
+
 POST=  http://localhost:8082/api/v1/users
    
 BODY > JSON
+
 {
   "firstName": "docker",
   "lastName": "user",
@@ -14,5 +16,8 @@ BODY > JSON
   "updatedBy": "admin"
 }
 
-##############################333
+grafana
+
+localhost:3000
+
 IMPORT Greafana Dashboard = 19004
