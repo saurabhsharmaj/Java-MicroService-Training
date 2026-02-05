@@ -23,7 +23,7 @@ create database user_database
 
 **4. Build and run the app using maven**
 
-![Content Creation Workflow](https://github.com/saurabhsharmaj/openai-youtube-short-automation/blob/main/_-%20visual%20selection%20(2).png](https://github.com/saurabhsharmaj/Java-MicroService-Training/blob/main/help-doc/DockerFile.png)
+![DockerFile](https://github.com/saurabhsharmaj/Java-MicroService-Training/blob/e4ae03649dbd7646886db1aaafb973f036e6e9d0/help-doc/DockerFile.png)
 ```bash
 mvn package
 java -jar target/spring-boot-rest-api-tutorial-0.0.1-SNAPSHOT.jar
