@@ -1,11 +1,8 @@
-# Use a lightweight OpenJDK image
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-jammy
 
-# Set working directory
 WORKDIR /app
 
-# Copy the jar file
 COPY target/*.jar app.jar
 
-# Run the jar file
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
