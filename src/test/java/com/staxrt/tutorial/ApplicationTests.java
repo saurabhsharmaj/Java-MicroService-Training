@@ -15,6 +15,9 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import com.staxrt.tutorial.model.User;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ApplicationTests {
